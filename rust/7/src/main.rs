@@ -121,7 +121,7 @@ fn main() {
 
 fn solution(input: &str, part: u8) -> u32 {
     let mut hands = Hand::from_lines(input, part);
-    hands.sort();
+    hands.sort_unstable();
     hands
         .iter()
         .enumerate()
