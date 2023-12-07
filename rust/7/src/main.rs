@@ -19,6 +19,10 @@ struct Hand {
 }
 
 impl Hand {
+    fn from_lines(lines: &str, part: u8) -> Vec<Hand> {
+        lines.lines().map(|l| Hand::from_line(l, part)).collect()
+    }
+
     fn from_line(line: &str, part: u8) -> Hand {
         let parts: Vec<&str> = line.split(" ").collect();
         Hand {
@@ -77,6 +81,32 @@ impl Hand {
     }
 }
 
+impl Eq for Hand {}
+
+impl PartialEq<Self> for Hand {
+    fn eq(&self, other: &Self) -> bool {
+        self.cmp(other) == Ordering::Equal
+    }
+}
+
+impl PartialOrd<Self> for Hand {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Hand {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let self_rank = self.rank() as u8;
+        let other_rank = other.rank() as u8;
+        if self_rank != other_rank {
+            self_rank.cmp(&other_rank)
+        } else {
+            self.cards.cmp(&other.cards)
+        }
+    }
+}
+
 fn main() {
     let input = fs::read_to_string("input.txt").expect("file read fail");
 
@@ -90,21 +120,11 @@ fn main() {
 }
 
 fn solution(input: &str, part: u8) -> u32 {
-    let mut hands: Vec<Hand> = input.lines().map(|l| Hand::from_line(l, part)).collect();
-    hands.sort_by(compare_hands);
+    let mut hands = Hand::from_lines(input, part);
+    hands.sort();
     hands
         .iter()
         .enumerate()
         .map(|(i, h)| ((i + 1) as u32) * h.bid)
         .sum()
-}
-
-fn compare_hands(a: &Hand, b: &Hand) -> Ordering {
-    let a_rank = a.rank() as u8;
-    let b_rank = b.rank() as u8;
-    if a_rank != b_rank {
-        a_rank.cmp(&b_rank)
-    } else {
-        a.cards.cmp(&b.cards)
-    }
 }
